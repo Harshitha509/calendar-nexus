@@ -10,9 +10,9 @@ export default function page() {
       date: '2024-07-10', // yyyy-mm-dd format
       startHour: 2,
       duration: 2,
-      total: '30',
-      present: '28',
-      absent: '2',
+      total: 'T30',
+      present: 'P28',
+      absent: 'A2',
       isComplete: false,
       isOngoing: false
     },

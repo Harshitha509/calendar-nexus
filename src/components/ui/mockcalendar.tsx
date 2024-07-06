@@ -114,10 +114,13 @@ function CustomCalendar({
         </span>
         <Button onClick={handleToday}>Today</Button>
       </div>
-      <div className="flex-grow grid grid-cols-[auto,1fr] gap-4 overflow-auto">
+      <div className="flex-grow grid grid-cols-[auto,1fr] overflow-auto">
         <div className="space-y-6 pr-4 text-right">
+        <div className=
+                  "text-center w-full p-3 pb-10 h-12 bg-white  border-b  sticky z-10 top-0 "
+               ></div>
           {hours.map(hour => (
-            <div key={hour} className="h-20 flex items-center justify-end">
+            <div key={hour} className="h-14 flex items-center justify-end">
               <span className="text-sm text-gray-500 -translate-y-1/2">
                 Hour {hour}
               </span>
@@ -159,12 +162,12 @@ function CustomCalendar({
                             height: `${subject.duration * 80 - 8}px`,
                           }}
                         >
-                          <div className="flex flex-col gap-3">
-                            <div className="flex gap-10">
-                              <div className="font-semibold text-lg">{subject.title}</div>
+                          <div className="flex flex-col gap-1 w-full">
+                            <div className="flex justify-between">
+                              <div className="font-semibold text-sm">{subject.title}</div>
                               <div>{subject.code}</div>
                             </div>
-                            <div className="flex gap-8">
+                            <div className="flex justify-between px-2 ">
                               <div className="font-bold ">{subject.total}</div>
                               <div className="font-bold ">{subject.present}</div>
                               <div className="font-bold ">{subject.absent}</div>
