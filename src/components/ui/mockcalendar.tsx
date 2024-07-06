@@ -2,16 +2,17 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { addDays, format, startOfWeek, isToday } from "date-fns"
+import { addDays, format, startOfWeek, isToday, isSameDay, parse, getUnixTime } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
 
 interface Subject {
   id: string;
   title: string;
   code: string;
-  day: number;
+  date: string; // in yyyy-mm-dd format
   startHour: number;
   duration: number;
   total: string;
@@ -34,12 +35,56 @@ export type CustomCalendarProps = {
   subjects: Subject[];
 }
 
+function parseDate(dateString: string): Date {
+  return parse(dateString, 'yyyy-MM-dd', new Date());
+}
+
+function checkOverlap(subjects: Subject[]): [Subject[], string[]] {
+  const validSubjects: Subject[] = [];
+  const overlaps: string[] = [];
+  
+  for (const subject of subjects) {
+    const subjectDate = parseDate(subject.date);
+    const isOverlapping = validSubjects.some(validSubject => {
+      const validSubjectDate = parseDate(validSubject.date);
+      return isSameDay(validSubjectDate, subjectDate) &&
+        ((validSubject.startHour < subject.startHour + subject.duration &&
+          subject.startHour < validSubject.startHour + validSubject.duration) ||
+         (subject.startHour < validSubject.startHour + validSubject.duration &&
+          validSubject.startHour < subject.startHour + subject.duration))
+    });
+
+    if (isOverlapping) {
+      overlaps.push(`${subject.title} on ${subject.date} overlaps with another subject`);
+    } else {
+      validSubjects.push(subject);
+    }
+  }
+
+  return [validSubjects, overlaps];
+}
+
 function CustomCalendar({
   numberOfDays = 7,
   subjects
 }: CustomCalendarProps) {
   const [startDate, setStartDate] = React.useState(startOfWeek(new Date()))
   const hours = Array.from({ length: 7 }, (_, i) => i + 1) // Hours 1 to 7
+  const { toast } = useToast()
+  const [validSubjects, setValidSubjects] = React.useState<Subject[]>([])
+
+  React.useEffect(() => {
+    const [valid, overlaps] = checkOverlap(subjects);
+    setValidSubjects(valid);
+    
+    if (overlaps.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Subject overlap detected",
+        description: overlaps.join('\n'),
+      })
+    }
+  }, [subjects, toast]);
 
   const handlePrevWeek = () => {
     setStartDate(prev => addDays(prev, -numberOfDays))
@@ -96,8 +141,8 @@ function CustomCalendar({
                   </div>
                 </div>
                 <div className="relative">
-                  {subjects
-                    .filter(subject => subject.day === dayIndex)
+                  {validSubjects
+                    .filter(subject => isSameDay(parseDate(subject.date), currentDate))
                     .map(subject => {
                       const [bgColor, _] = (subjectColors[subject.title] || 'bg-gray-200 border-gray-500').split(' ');
                       return (

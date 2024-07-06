@@ -3,8 +3,19 @@ import React from 'react'
 
 export default function page() {
   const subjects = [
-    { id: '1', title: 'Maths',code:'15CS10T', day: 3, startHour: 4, duration: 3, total: 'T23', present: 'P15',absent:'A8', isComplete: false,isOngoing: true },
-     { id: '2', title: 'Applied Science',code:'15CS10T', day: 2, startHour: 4, duration: 2, total: 'T23', present: 'P15',absent:'A8', isComplete: true,isOngoing: false },
+    {
+      id: '1',
+      title: 'Maths',
+      code: 'MATH101',
+      date: '2024-07-10', // yyyy-mm-dd format
+      startHour: 2,
+      duration: 2,
+      total: '30',
+      present: '28',
+      absent: '2',
+      isComplete: false,
+      isOngoing: false
+    },
     // ... more subjects
   ];
   return (
