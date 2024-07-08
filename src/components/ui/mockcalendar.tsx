@@ -1,11 +1,12 @@
 "use client"
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { addDays, format, startOfWeek, isToday, isSameDay, parse } from "date-fns"
+import { addDays, format, isToday, isSameDay, parse, subDays } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import SubjectDetailBox from "@/components/ui/SubjectDetailBox"  // Adjust the import path as needed
+import SubjectDetailBox from "@/components/ui/SubjectDetailBox"
+import DateFilter from "@/components/ui/DateFilter"
 
 interface Subject {
   id: string;
@@ -29,7 +30,6 @@ const subjectColors: { [key: string]: string } = {
 };
 
 export type CustomCalendarProps = {
-  numberOfDays?: number;
   subjects: Subject[];
 }
 
@@ -63,10 +63,10 @@ function checkOverlap(subjects: Subject[]): [Subject[], string[]] {
 }
 
 function CustomCalendar({
-  numberOfDays = 7,
   subjects
 }: CustomCalendarProps) {
-  const [startDate, setStartDate] = React.useState(startOfWeek(new Date()))
+  const [startDate, setStartDate] = React.useState(new Date())
+  const [endDate, setEndDate] = React.useState(addDays(new Date(), 6))
   const hours = Array.from({ length: 7 }, (_, i) => i + 1) // Hours 1 to 7
   const { toast } = useToast()
   const [validSubjects, setValidSubjects] = React.useState<Subject[]>([])
@@ -86,24 +86,34 @@ function CustomCalendar({
   }, [subjects, toast]);
 
   const handlePrevWeek = () => {
-    setStartDate(prev => addDays(prev, -numberOfDays))
+    setStartDate(prev => subDays(prev, 7))
+    setEndDate(prev => subDays(prev, 7))
   }
 
   const handleNextWeek = () => {
-    setStartDate(prev => addDays(prev, numberOfDays))
+    setStartDate(prev => addDays(prev, 7))
+    setEndDate(prev => addDays(prev, 7))
   }
 
   const handleToday = () => {
-    setStartDate(startOfWeek(new Date()))
+    const today = new Date()
+    setStartDate(today)
+    setEndDate(addDays(today, 6))
+  }
+
+  const handleDateChange = (start: Date, end: Date) => {
+    setStartDate(start)
+    setEndDate(end)
   }
 
   return (
     <div className="h-screen flex flex-col p-4">
       <div className="flex justify-between items-center mb-4">
-        <div className="space-x-2">
+        <div className="flex items-center space-x-4">
           <Button variant="outline" size="icon" onClick={handlePrevWeek}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
+          <DateFilter startDate={startDate} endDate={endDate} onDateChange={handleDateChange} />
           <Button variant="outline" size="icon" onClick={handleNextWeek}>
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -124,8 +134,8 @@ function CustomCalendar({
             </div>
           ))}
         </div>
-        <div className="grid" style={{ gridTemplateColumns: `repeat(${numberOfDays}, minmax(150px, 1fr))` }}>
-          {Array.from({ length: numberOfDays }).map((_, dayIndex) => {
+        <div className="grid" style={{ gridTemplateColumns: `repeat(7, minmax(150px, 1fr))` }}>
+          {Array.from({ length: 7 }).map((_, dayIndex) => {
             const currentDate = addDays(startDate, dayIndex)
             return (
               <div key={dayIndex} className="border-l first:border-l-0">
@@ -197,4 +207,4 @@ function CustomCalendar({
 
 CustomCalendar.displayName = "CustomCalendar"
 
-export { CustomCalendar }
+export { CustomCalendar } 
