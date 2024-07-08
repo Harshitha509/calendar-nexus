@@ -1,12 +1,11 @@
 "use client"
-
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { addDays, format, startOfWeek, isToday, isSameDay, parse, getUnixTime } from "date-fns"
-
+import { addDays, format, startOfWeek, isToday, isSameDay, parse } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
+import SubjectDetailBox from "@/components/ui/SubjectDetailBox"  // Adjust the import path as needed
 
 interface Subject {
   id: string;
@@ -19,7 +18,6 @@ interface Subject {
   present: string;
   absent: string;
   isComplete: boolean;
-  isOngoing: boolean;
 }
 
 const subjectColors: { [key: string]: string } = {
@@ -72,6 +70,7 @@ function CustomCalendar({
   const hours = Array.from({ length: 7 }, (_, i) => i + 1) // Hours 1 to 7
   const { toast } = useToast()
   const [validSubjects, setValidSubjects] = React.useState<Subject[]>([])
+  const [selectedSubject, setSelectedSubject] = React.useState<Subject | null>(null);
 
   React.useEffect(() => {
     const [valid, overlaps] = checkOverlap(subjects);
@@ -116,9 +115,7 @@ function CustomCalendar({
       </div>
       <div className="flex-grow grid grid-cols-[auto,1fr] overflow-auto">
         <div className="space-y-6 pr-4 text-right">
-        <div className=
-                  "text-center w-full p-3 pb-10 h-12 bg-white  border-b  sticky z-10 top-0 "
-               ></div>
+          <div className="text-center w-full p-3 pb-10 h-12 bg-white border-b sticky z-10 top-0"></div>
           {hours.map(hour => (
             <div key={hour} className="h-14 flex items-center justify-end">
               <span className="text-sm text-gray-500 -translate-y-1/2">
@@ -152,15 +149,18 @@ function CustomCalendar({
                         <div
                           key={subject.id}
                           className={cn(
-                            "absolute left-1 right-1 p-2 rounded-lg text-xs overflow-hidden border-2",
+                            "absolute left-1 right-1 p-2 rounded-lg text-xs overflow-hidden border-2 cursor-pointer",
                             bgColor,
-                            subject.isOngoing ? 'border-dashed border-gray-500 bg-gray-300' : 'border-solid',
-                            !subject.isOngoing && (subjectColors[subject.title]?.split(' ')[1] || 'border-gray-500 ')
+                            subject.isComplete 
+                              ? 'border-solid' 
+                              : 'border-dashed bg-opacity-50',
+                            subjectColors[subject.title]?.split(' ')[1] || 'border-gray-500'
                           )}
                           style={{
                             top: `${(subject.startHour - 1) * 80 + 4}px`,
                             height: `${subject.duration * 80 - 8}px`,
                           }}
+                          onClick={() => setSelectedSubject(subject)}
                         >
                           <div className="flex flex-col gap-1 w-full">
                             <div className="flex justify-between">
@@ -185,6 +185,12 @@ function CustomCalendar({
           })}
         </div>
       </div>
+      {selectedSubject && (
+        <SubjectDetailBox
+          subject={selectedSubject}
+          onClose={() => setSelectedSubject(null)}
+        />
+      )}
     </div>
   )
 }

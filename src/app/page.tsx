@@ -13,12 +13,23 @@ export default function page() {
       total: 'T30',
       present: 'P28',
       absent: 'A2',
-      isComplete: false,
-      isOngoing: false
+      isComplete: true
     },
-    // ... more subjects
+    {
+      id: '2',
+      title: 'FOC',
+      code: 'FOC102',
+      date: '2024-07-11', // yyyy-mm-dd format
+      startHour: 1,
+      duration: 4,
+      total: 'T30',
+      present: 'P34',
+      absent: 'A4',
+      isComplete: false
+    },
+    // ... more 
   ];
   return (
-    <CustomCalendar numberOfDays={7} subjects={subjects}/>
+    <CustomCalendar numberOfDays={7} subjects={subjects} />
   )
 }
