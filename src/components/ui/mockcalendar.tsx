@@ -8,8 +8,6 @@ import {
   isSameDay,
   parse,
   subDays,
-  startOfDay,
-  endOfDay,
   differenceInDays,
 } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -17,9 +15,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import SubjectDetailBox from "@/components/ui/SubjectDetailBox";
 import DateFilter from "./DateFilter";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { DateRange } from "react-day-picker";
 
 interface Subject {
   id: string;
