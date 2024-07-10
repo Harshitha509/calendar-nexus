@@ -30,6 +30,6 @@ export default function page() {
     // ... more 
   ];
   return (
-    <CustomCalendar numberOfDays={7} subjects={subjects} />
+    <CustomCalendar  subjects={subjects} />
   )
 }

@@ -1,12 +1,25 @@
-"use client"
-import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { addDays, format, isToday, isSameDay, parse, subDays } from "date-fns"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-import SubjectDetailBox from "@/components/ui/SubjectDetailBox"
-import DateFilter from "@/components/ui/DateFilter"
+"use client";
+import * as React from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  addDays,
+  format,
+  isToday,
+  isSameDay,
+  parse,
+  subDays,
+  startOfDay,
+  endOfDay,
+  differenceInDays,
+} from "date-fns";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import SubjectDetailBox from "@/components/ui/SubjectDetailBox";
+import DateFilter from "./DateFilter";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { DateRange } from "react-day-picker";
 
 interface Subject {
   id: string;
@@ -62,15 +75,17 @@ function checkOverlap(subjects: Subject[]): [Subject[], string[]] {
   return [validSubjects, overlaps];
 }
 
-function CustomCalendar({
-  subjects
-}: CustomCalendarProps) {
-  const [startDate, setStartDate] = React.useState(new Date())
-  const [endDate, setEndDate] = React.useState(addDays(new Date(), 6))
-  const hours = Array.from({ length: 7 }, (_, i) => i + 1) // Hours 1 to 7
-  const { toast } = useToast()
-  const [validSubjects, setValidSubjects] = React.useState<Subject[]>([])
+function CustomCalendar({ subjects }: CustomCalendarProps) {
+  const [startDate, setStartDate] = React.useState(new Date());
+  const [endDate, setEndDate] = React.useState(addDays(new Date(), 6));
+  const [filteredStartDate, setFilteredStartDate] = React.useState<Date | null>(null);
+  const [filteredEndDate, setFilteredEndDate] = React.useState<Date | null>(null);
+  const [visibleDays, setVisibleDays] = React.useState(7);
+  const hours = Array.from({ length: 7 }, (_, i) => i + 1); // Hours 1 to 7
+  const { toast } = useToast();
+  const [validSubjects, setValidSubjects] = React.useState<Subject[]>([]);
   const [selectedSubject, setSelectedSubject] = React.useState<Subject | null>(null);
+  const calendarRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const [valid, overlaps] = checkOverlap(subjects);
@@ -81,40 +96,89 @@ function CustomCalendar({
         variant: "destructive",
         title: "Subject overlap detected",
         description: overlaps.join('\n'),
-      })
+      });
     }
   }, [subjects, toast]);
 
   const handlePrevWeek = () => {
-    setStartDate(prev => subDays(prev, 7))
-    setEndDate(prev => subDays(prev, 7))
-  }
-
+    if (!filteredStartDate || startDate > filteredStartDate) {
+      setStartDate(prev => subDays(prev, 7));
+      setEndDate(prev => subDays(prev, 7));
+    }
+  };
+  
   const handleNextWeek = () => {
-    setStartDate(prev => addDays(prev, 7))
-    setEndDate(prev => addDays(prev, 7))
-  }
+    if (!filteredEndDate || addDays(endDate, 7) <= filteredEndDate) {
+      setStartDate(prev => addDays(prev, 7));
+      setEndDate(prev => addDays(prev, 7));
+    }
+  };
 
   const handleToday = () => {
-    const today = new Date()
-    setStartDate(today)
-    setEndDate(addDays(today, 6))
-  }
+    const today = new Date();
+    setStartDate(today);
+    setEndDate(addDays(today, 6));
+    setFilteredStartDate(null);
+    setFilteredEndDate(null);
+    setVisibleDays(7);
+  };
 
   const handleDateChange = (start: Date, end: Date) => {
-    setStartDate(start)
-    setEndDate(end)
-  }
+    setFilteredStartDate(start);
+    setFilteredEndDate(end);
+    setStartDate(start);
+    setEndDate(end);
+    const daysBetween = differenceInDays(end, start) + 1;
+    setVisibleDays(daysBetween);
+    scrollToDate(start);
+  };
+
+  const handleRemoveFilter = () => {
+    setFilteredStartDate(null);
+    setFilteredEndDate(null);
+    handleToday();
+  };
+
+  const scrollToDate = (date: Date) => {
+    if (calendarRef.current) {
+      const dayIndex = Math.floor((date.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000));
+      const dayElement = calendarRef.current.children[dayIndex] as HTMLElement;
+      if (dayElement) {
+        dayElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
+
+  React.useEffect(() => {
+    if (filteredStartDate) {
+      scrollToDate(filteredStartDate);
+    }
+  }, [filteredStartDate]);
 
   return (
     <div className="h-screen flex flex-col p-4">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" size="icon" onClick={handlePrevWeek}>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={handlePrevWeek}
+            disabled={filteredStartDate !== null && startDate <= filteredStartDate}
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <DateFilter startDate={startDate} endDate={endDate} onDateChange={handleDateChange} />
-          <Button variant="outline" size="icon" onClick={handleNextWeek}>
+          <DateFilter 
+            startDate={filteredStartDate || startDate} 
+            endDate={filteredEndDate || endDate} 
+            onDateChange={handleDateChange}
+            onFilterRemove={handleRemoveFilter}
+          />
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={handleNextWeek}
+            disabled={filteredEndDate !== null && endDate >= filteredEndDate}
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -123,9 +187,9 @@ function CustomCalendar({
         </span>
         <Button onClick={handleToday}>Today</Button>
       </div>
-      <div className="flex-grow grid grid-cols-[auto,1fr] overflow-auto">
-        <div className="space-y-6 pr-4 text-right">
-          <div className="text-center w-full p-3 pb-10 h-12 bg-white border-b sticky z-10 top-0"></div>
+      <div className="flex-grow grid w-full  grid-cols-[auto,1fr] overflow-auto">
+        <div className="space-y-6 pr-4 w-20 fixed z-20 bg-white border-r text-right">
+          <div className="text-center w-full p-3 pb-10 h-12 border-b  top-0"></div>
           {hours.map(hour => (
             <div key={hour} className="h-14 flex items-center justify-end">
               <span className="text-sm text-gray-500 -translate-y-1/2">
@@ -134,14 +198,15 @@ function CustomCalendar({
             </div>
           ))}
         </div>
-        <div className="grid" style={{ gridTemplateColumns: `repeat(7, minmax(150px, 1fr))` }}>
-          {Array.from({ length: 7 }).map((_, dayIndex) => {
-            const currentDate = addDays(startDate, dayIndex)
+        <div className="grid pl-20 w-screen" style={{ gridTemplateColumns: `repeat(${visibleDays}, minmax(150px, 1fr))` }} ref={calendarRef}>
+          {Array.from({ length: visibleDays }).map((_, dayIndex) => {
+            const currentDate = addDays(startDate, dayIndex);
             return (
               <div key={dayIndex} className="border-l first:border-l-0">
                 <div className={cn(
                   "text-center p-2 border-b sticky top-0 bg-white z-10",
-                  isToday(currentDate) && "bg-blue-100"
+                  isToday(currentDate) && "bg-blue-100",
+                  filteredStartDate && isSameDay(currentDate, filteredStartDate) && "bg-green-100"
                 )}>
                   <div className="text-sm font-medium">
                     {format(currentDate, "EEE")}
@@ -184,14 +249,14 @@ function CustomCalendar({
                             </div>
                           </div>
                         </div>
-                      )
+                      );
                     })}
                   {hours.map(hour => (
-                    <div key={hour} className="h-20 border-b"></div>
+                    <div key={hour} className="h-20 min-w-40 border-b"></div>
                   ))}
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </div>
@@ -202,9 +267,8 @@ function CustomCalendar({
         />
       )}
     </div>
-  )
+  );
 }
+CustomCalendar.displayName = "CustomCalendar";
 
-CustomCalendar.displayName = "CustomCalendar"
-
-export { CustomCalendar } 
+export { CustomCalendar };

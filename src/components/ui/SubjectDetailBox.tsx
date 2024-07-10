@@ -33,14 +33,8 @@ const SubjectDetailBox: React.FC<SubjectDetailBoxProps> = ({ subject, onClose })
         </button>
       </div>
       <div className="p-4 flex-grow overflow-auto">
-        <p className="text-lg mb-2">Code: {subject.code}</p>
-        <p className="mb-2">Date: {subject.date}</p>
-        <p className="mb-2">Start Hour: {subject.startHour}</p>
-        <p className="mb-2">Duration: {subject.duration} hour(s)</p>
-        <p className="mb-2">Total: {subject.total}</p>
-        <p className="mb-2">Present: {subject.present}</p>
-        <p className="mb-2">Absent: {subject.absent}</p>
-        <p>Status: {subject.isComplete ? 'Complete' : 'Incomplete'}</p>
+        <p className="text-lg mb-2">{subject.code}</p>
+        
       </div>
     </div>
   );
