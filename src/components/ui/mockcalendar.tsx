@@ -13,8 +13,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import SubjectDetailBox from "@/components/ui/SubjectDetailBox";
-import DateFilter from "./DateFilter";
+import SubjectDetailBox from "@/components/ui/subjectdetailbox";
+import DateFilter from "./datefilter";
+
 
 interface Subject {
   id: string;
@@ -152,7 +153,7 @@ function CustomCalendar({ subjects }: CustomCalendarProps) {
 
   return (
     <div className="h-screen flex flex-col p-4">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex gap-80 items-center mb-4">
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline" 
@@ -162,7 +163,7 @@ function CustomCalendar({ subjects }: CustomCalendarProps) {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <DateFilter 
+          <DateFilter
             startDate={filteredStartDate || startDate} 
             endDate={filteredEndDate || endDate} 
             onDateChange={handleDateChange}
@@ -177,7 +178,7 @@ function CustomCalendar({ subjects }: CustomCalendarProps) {
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <span className="text-lg font-medium">
+        <span className="text-lg mr-40  font-medium">
           {format(startDate, "MMMM yyyy")}
         </span>
         <Button onClick={handleToday}>Today</Button>

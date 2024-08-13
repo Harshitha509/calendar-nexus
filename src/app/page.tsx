@@ -1,3 +1,4 @@
+import { Component } from '@/components/ui/barchart'
 import { CustomCalendar } from '@/components/ui/mockcalendar'
 import React from 'react'
 
@@ -7,7 +8,7 @@ export default function page() {
       id: '1',
       title: 'Maths',
       code: 'MATH101',
-      date: '2024-07-10', // yyyy-mm-dd format
+      date: '2024-08-11', // yyyy-mm-dd format
       startHour: 2,
       duration: 2,
       total: 'T30',
@@ -19,7 +20,7 @@ export default function page() {
       id: '2',
       title: 'FOC',
       code: 'FOC102',
-      date: '2024-07-11', // yyyy-mm-dd format
+      date: '2024-08-10', // yyyy-mm-dd format
       startHour: 1,
       duration: 4,
       total: 'T30',
@@ -30,6 +31,7 @@ export default function page() {
     // ... more 
   ];
   return (
-    <CustomCalendar  subjects={subjects} />
+    <CustomCalendar subjects={subjects} />
+
   )
 }
