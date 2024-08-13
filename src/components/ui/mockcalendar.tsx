@@ -13,8 +13,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import SubjectDetailBox from "@/components/ui/subjectdetailbox";
-import DateFilter from "./datefilter";
+import SubjectDetailBox from "./SubjectDetailBox";
+import DateFilter from "./DateFilter";
+
 
 
 interface Subject {
